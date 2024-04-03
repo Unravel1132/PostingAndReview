@@ -58,7 +58,7 @@
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 </form>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<<script>
+<script>
     $(document).ready(function () {
         $('#reviewForm').submit(function (event) {
             event.preventDefault();
@@ -97,9 +97,6 @@
         // Вызываем функцию загрузки отзывов при загрузке страницы
         loadReviews();
     });
-
 </script>
-
-
 </body>
 </html>

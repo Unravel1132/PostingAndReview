@@ -27,7 +27,7 @@ public class ReviewController {
     }
 
     @PostMapping
-    public void addReviewToPost(@RequestParam Long postId, @RequestParam String text) {
+    public void addReviewToPost(@RequestParam Long postId, @RequestBody String text) {
         reviewService.addReviewToPost(postId, text);
     }
 

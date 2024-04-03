@@ -100,28 +100,17 @@
 <body>
 <h1>Posts</h1>
 <div id="posts"></div>
-
 <h2>Написать пост</h2>
 <form id="postForm">
     <label>Title:</label><br>
     <input type="text" id="title" name="title"><br>
     <label>Content:</label><br>
     <textarea id="content" name="content"></textarea><br>
-    <button type="submit" id="createPostBtn">Запостить</button>
+    <button type="button" id="createPostBtn">Запостить</button>
 </form>
 
-<!--<h1>Отзывы</h1>-->
-<!--<div id="reviews"></div>-->
 
-<!--<h2>Создать отзыв</h2>-->
-<!--<form id="reviewForm">-->
-<!--    <label>Text:</label><br>-->
-<!--    <input type="text" id="text" name="text"><br>-->
-<!--    <button type="submit" id="createReviewBtn">Оставить отзыв</button>-->
-<!--</form>-->
 
-<!-- Форма удаления поста -->
-<!-- Форма удаления поста -->
 <div class="form-container">
     <h2>Удалить пост</h2>
     <!-- Форма удаления поста -->
@@ -133,12 +122,6 @@
 
 </div>
 
-<!--&lt;!&ndash; Форма удаления отзыва &ndash;&gt;-->
-<!--<form id="deleteReviewForm">-->
-<!--    <label>Удалить отзыв (введите ID отзыва):</label><br>-->
-<!--    <input type="text" id="reviewId" name="reviewId"><br>-->
-<!--    <button type="submit" id="deleteReviewBtn">Удалить отзыв</button>-->
-<!--</form>-->
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -147,27 +130,15 @@
             $.get("/api/posts", function (posts) {
                 var postsHtml = "";
                 posts.forEach(function (post) {
-                    // Создаем ссылку на страницу с подробностями о посте
                     postsHtml += "<p><a href='/posts/" + post.id + "'>" + post.title + "</a>, Content: " + post.content + "</p>";
                 });
                 $("#posts").html(postsHtml);
             });
         }
-        function loadReviews() {
-            $.get("/api/reviews", function (reviews) {
-                var reviewsHtml = "";
-                reviews.forEach(function (review) {
-                    reviewsHtml += "<p>Review: " + review.text + "</p>";
-                });
-                $("#reviews").html(reviewsHtml);
-            });
-        }
 
         loadPosts();
-        loadReviews();
 
-        $("#createPostBtn").click(function (event) {
-            event.preventDefault();
+        $("#createPostBtn").click(function () {
             var post = {
                 title: $("#title").val(),
                 content: $("#content").val()
@@ -179,57 +150,6 @@
             });
         });
 
-        $("#createReviewBtn").click(function (event) {
-            event.preventDefault();
-            var review = {
-                text: $("#text").val()
-            };
-
-            var formData = new FormData();
-            formData.append("text", review.text);
-
-            $.ajax({
-                url: "/api/reviews",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (data) {
-                    loadReviews();
-                    $("#text").val("");
-                }
-            });
-        });
-
-        /// Обработчик для кнопки удаления поста
-        $("#deletePostForm").submit(function (event) {
-            event.preventDefault();
-            var postTitle = $("#postTitle").val(); // Здесь используется postTitle, а не postId
-            $.ajax({
-                url: "/api/posts/delete?title=" + postTitle,
-                type: "DELETE",
-                success: function (data) {
-                    loadPosts();
-                    $("#postTitle").val("");
-                }
-            });
-        });
-
-// Второй обработчик для кнопки удаления поста
-        $("#deletePostForm").submit(function (event) {
-            event.preventDefault();
-            var postId = $("#postId").val(); // postId должен использоваться здесь
-            $.ajax({
-                url: "/api/posts/" + postId,
-                type: "DELETE",
-                success: function (data) {
-                    loadPosts();
-                    $("#postId").val("");
-                }
-            });
-        });
-
-        // Обработчик для кнопки удаления поста
         $("#deletePostForm").submit(function (event) {
             event.preventDefault();
             var postId = $("#postId").val();
@@ -242,9 +162,8 @@
                 }
             });
         });
-
-
     });
+
 </script>
 </body>
 </html>
