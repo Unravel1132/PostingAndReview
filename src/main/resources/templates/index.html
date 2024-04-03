@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        #posts, #reviews {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], textarea {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        p {
+            margin-bottom: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container label {
+            color: #333;
+        }
+
+        .form-container input[type="text"], .form-container textarea {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .form-container button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Posts</h1>
+<div id="posts"></div>
+
+<h2>Написать пост</h2>
+<form id="postForm">
+    <label>Title:</label><br>
+    <input type="text" id="title" name="title"><br>
+    <label>Content:</label><br>
+    <textarea id="content" name="content"></textarea><br>
+    <button type="submit" id="createPostBtn">Запостить</button>
+</form>
+
+<!--<h1>Отзывы</h1>-->
+<!--<div id="reviews"></div>-->
+
+<!--<h2>Создать отзыв</h2>-->
+<!--<form id="reviewForm">-->
+<!--    <label>Text:</label><br>-->
+<!--    <input type="text" id="text" name="text"><br>-->
+<!--    <button type="submit" id="createReviewBtn">Оставить отзыв</button>-->
+<!--</form>-->
+
+<!-- Форма удаления поста -->
+<!-- Форма удаления поста -->
+<div class="form-container">
+    <h2>Удалить пост</h2>
+    <!-- Форма удаления поста -->
+    <form id="deletePostForm">
+        <label>Введите ID поста:</label><br>
+        <input type="text" id="postId" name="postId"><br> <!-- Заменено postTitle на postId -->
+        <button type="submit" id="deletePostBtn">Удалить пост</button>
+    </form>
+
+</div>
+
+<!--&lt;!&ndash; Форма удаления отзыва &ndash;&gt;-->
+<!--<form id="deleteReviewForm">-->
+<!--    <label>Удалить отзыв (введите ID отзыва):</label><br>-->
+<!--    <input type="text" id="reviewId" name="reviewId"><br>-->
+<!--    <button type="submit" id="deleteReviewBtn">Удалить отзыв</button>-->
+<!--</form>-->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function loadPosts() {
+            $.get("/api/posts", function (posts) {
+                var postsHtml = "";
+                posts.forEach(function (post) {
+                    // Создаем ссылку на страницу с подробностями о посте
+                    postsHtml += "<p><a href='/posts/" + post.id + "'>" + post.title + "</a>, Content: " + post.content + "</p>";
+                });
+                $("#posts").html(postsHtml);
+            });
+        }
+        function loadReviews() {
+            $.get("/api/reviews", function (reviews) {
+                var reviewsHtml = "";
+                reviews.forEach(function (review) {
+                    reviewsHtml += "<p>Review: " + review.text + "</p>";
+                });
+                $("#reviews").html(reviewsHtml);
+            });
+        }
+
+        loadPosts();
+        loadReviews();
+
+        $("#createPostBtn").click(function (event) {
+            event.preventDefault();
+            var post = {
+                title: $("#title").val(),
+                content: $("#content").val()
+            };
+            $.post("/api/posts", post, function (data) {
+                loadPosts();
+                $("#title").val("");
+                $("#content").val("");
+            });
+        });
+
+        $("#createReviewBtn").click(function (event) {
+            event.preventDefault();
+            var review = {
+                text: $("#text").val()
+            };
+
+            var formData = new FormData();
+            formData.append("text", review.text);
+
+            $.ajax({
+                url: "/api/reviews",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    loadReviews();
+                    $("#text").val("");
+                }
+            });
+        });
+
+        /// Обработчик для кнопки удаления поста
+        $("#deletePostForm").submit(function (event) {
+            event.preventDefault();
+            var postTitle = $("#postTitle").val(); // Здесь используется postTitle, а не postId
+            $.ajax({
+                url: "/api/posts/delete?title=" + postTitle,
+                type: "DELETE",
+                success: function (data) {
+                    loadPosts();
+                    $("#postTitle").val("");
+                }
+            });
+        });
+
+// Второй обработчик для кнопки удаления поста
+        $("#deletePostForm").submit(function (event) {
+            event.preventDefault();
+            var postId = $("#postId").val(); // postId должен использоваться здесь
+            $.ajax({
+                url: "/api/posts/" + postId,
+                type: "DELETE",
+                success: function (data) {
+                    loadPosts();
+                    $("#postId").val("");
+                }
+            });
+        });
+
+        // Обработчик для кнопки удаления поста
+        $("#deletePostForm").submit(function (event) {
+            event.preventDefault();
+            var postId = $("#postId").val();
+            $.ajax({
+                url: "/api/posts/" + postId,
+                type: "DELETE",
+                success: function (data) {
+                    loadPosts();
+                    $("#postId").val("");
+                }
+            });
+        });
+
+
+    });
+</script>
+</body>
+</html>

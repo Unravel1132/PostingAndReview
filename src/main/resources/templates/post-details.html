@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Details</title>
+    <style>
+        /* CSS для формы отзыва */
+        #reviewForm {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #reviewForm textarea {
+            width: 100%;
+            height: 100px;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        #reviewForm button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #reviewForm button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<h1 th:text="${post.title}"></h1>
+<p th:text="${post.content}"></p>
+
+<h2>Отзывы</h2>
+<ul>
+    <!-- Выводим отзывы к посту -->
+    <li th:each="review : ${post.reviews}">
+        <p th:text="${review.text}"></p>
+    </li>
+</ul>
+
+<h3>Оставить отзыв</h3>
+<form id="reviewForm" action="/posts/${post.id}/reviews" method="post">
+    <label for="reviewText">Текст отзыва:</label><br>
+    <textarea id="reviewText" name="text"></textarea><br>
+    <button type="submit">Отправить</button> <!-- Используем тип submit для кнопки отправки -->
+    <!-- Добавляем CSRF-токен -->
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+</form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<<script>
+    $(document).ready(function () {
+        $('#reviewForm').submit(function (event) {
+            event.preventDefault();
+            var reviewText = $('#reviewText').val();
+            var postId = "${post.id}"; // Подставляем значение идентификатора поста
+
+            $.ajax({
+                url: '/api/posts/' + postId + '/reviews',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ text: reviewText }),
+                success: function (data) {
+                    // Очищаем поле ввода отзыва
+                    $('#reviewText').val('');
+                    // Обновляем список отзывов на странице
+                    loadReviews();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отправке отзыва. Пожалуйста, попробуйте еще раз.');
+                }
+            });
+        });
+
+        // Функция для загрузки отзывов на страницу
+        function loadReviews() {
+            $.get("/api/posts/${post.id}/reviews", function (reviews) {
+                var reviewsHtml = "";
+                reviews.forEach(function (review) {
+                    reviewsHtml += "<p>" + review.text + "</p>";
+                });
+                $("#reviews").html(reviewsHtml);
+            });
+        }
+
+        // Вызываем функцию загрузки отзывов при загрузке страницы
+        loadReviews();
+    });
+
+</script>
+
+
+</body>
+</html>
